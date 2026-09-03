@@ -129,7 +129,7 @@ export const BackgroundMusic = () => {
     <div className="fixed bottom-6 right-6 z-50 pointer-events-auto">
       <audio
         ref={audioRef}
-        src="/assets/music.mp3"
+        src="/assets/music.mp3?v=2"
         loop
         preload="metadata"
         playsInline
