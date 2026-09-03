@@ -1,0 +1,10 @@
+{
+  "buildCommand": "pnpm --filter client build",
+  "outputDirectory": "apps/client/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
