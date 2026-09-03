@@ -43,6 +43,8 @@ export const FallingFlowers = () => {
           <img
             src="/assets/flower3.png"
             alt=""
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-contain swaying-flower"
             style={{
               animationDuration: `${flower.swayDuration}s`,

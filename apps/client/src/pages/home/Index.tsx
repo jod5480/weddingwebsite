@@ -298,12 +298,12 @@ const Index = () => {
             </button>
           </div>
           <div className="falling-flowers">
-            <img src="/assets/flower.png" className="falling-flower f-1" alt="" />
-            <img src="/assets/flower.png" className="falling-flower f-2" alt="" />
-            <img src="/assets/flower.png" className="falling-flower f-3" alt="" />
-            <img src="/assets/flower.png" className="falling-flower f-4" alt="" />
-            <img src="/assets/flower.png" className="falling-flower f-5" alt="" />
-            <img src="/assets/flower.png" className="falling-flower f-6" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-1" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-2" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-3" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-4" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-5" alt="" />
+            <img src="/assets/flower.png" decoding="async" className="falling-flower f-6" alt="" />
           </div>
         </div>
       )}
@@ -404,6 +404,8 @@ const Index = () => {
               src="/assets/temple_silhouette_kerala.jpg"
               alt=""
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
               className="pointer-events-none"
               style={{
                 position: 'absolute',
@@ -421,8 +423,8 @@ const Index = () => {
             <FallingFlowers />
             <div className="section-intro reveal relative z-10"><p className="eyebrow">Make a day of it</p><h2>The moment.<br /><em>We say I do.</em></h2></div>
             <div className="event-grid relative z-10">{events.map((event) => <article key={event.name} className={`event-card tone-${event.tone} reveal`}>
-              <img src="/assets/flower2.png" alt="" className="event-flower flower-tl" />
-              <img src="/assets/flower2.png" alt="" className="event-flower flower-br" />
+              <img src="/assets/flower2.png" alt="" loading="lazy" decoding="async" className="event-flower flower-tl" />
+              <img src="/assets/flower2.png" alt="" loading="lazy" decoding="async" className="event-flower flower-br" />
               <p className="eyebrow">{event.name}</p><h3>{event.date}</h3><p className="event-venue">{event.venue}</p><div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}><p className="eyebrow">Muhurtham Time</p><p className="event-time" style={{ margin: 0, fontSize: '16px', color: 'var(--gold)' }}>11:50 AM to 12:20 PM</p></div></article>)}</div>
             <div id="venue" className="venue-block reveal relative z-10"><div className="venue-copy relative z-10"><p className="eyebrow">Come celebrate with us</p><h2>Kannattukudi<br /><em>Mahadevi Temple.</em></h2><p>Neendakara Dalavapuram Rd, Neendakara<br />Kollam, Kerala 691582</p><button className="glass-button" onClick={() => window.open("https://maps.app.goo.gl/EH2mc193URJzSuDa8", "_blank", "noopener,noreferrer")}>Get directions <ArrowUpRightIcon /></button></div></div>
           </section>

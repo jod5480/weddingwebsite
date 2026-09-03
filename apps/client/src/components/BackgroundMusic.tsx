@@ -51,7 +51,7 @@ export const BackgroundMusic = () => {
     const audio = audioRef.current;
     if (audio) {
       audio.loop = true;
-      audio.preload = "auto";
+      audio.preload = "none";
     }
 
     window.__playWeddingMusic = startMusic;
@@ -125,8 +125,7 @@ export const BackgroundMusic = () => {
         ref={audioRef}
         src="/assets/music.mp3"
         loop
-        preload="auto"
-        autoPlay
+        preload="none"
         playsInline
       />
       <button
