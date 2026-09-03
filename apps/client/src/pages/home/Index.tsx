@@ -55,6 +55,31 @@ const Index = () => {
 
   useEffect(() => {
     document.title = "Anandhu & Vishnupriya — The Beginning of Forever";
+
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+      window.scrollTo(0, 0);
+
+      // Re-assert scroll to top after first paint and DOM attachment
+      const timer = setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+
+      const handleBeforeUnload = () => {
+        window.scrollTo(0, 0);
+      };
+      window.addEventListener("beforeunload", handleBeforeUnload);
+
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }
   }, []);
 
   useEffect(() => {

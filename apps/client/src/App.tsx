@@ -12,7 +12,20 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
+    // Disable Chrome's automatic scroll restoration on refresh so user starts at the top
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+      window.scrollTo(0, 0);
+    }
+
     const lenis = new Lenis();
+    lenis.scrollTo(0, { immediate: true });
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
