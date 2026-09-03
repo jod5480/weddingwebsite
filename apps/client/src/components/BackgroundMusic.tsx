@@ -10,56 +10,59 @@ declare global {
 export const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const fadeIntervalRef = useRef<number | null>(null);
-
-  const fadeInAudio = useCallback((audio: HTMLAudioElement, targetVolume = 0.4, duration = 1200) => {
-    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-    audio.volume = 0.05;
-    const steps = 20;
-    const stepTime = duration / steps;
-    const volumeStep = (targetVolume - 0.05) / steps;
-
-    fadeIntervalRef.current = window.setInterval(() => {
-      if (audio.volume + volumeStep >= targetVolume) {
-        audio.volume = targetVolume;
-        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-      } else {
-        audio.volume = Math.min(targetVolume, audio.volume + volumeStep);
-      }
-    }, stepTime);
-  }, []);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const startMusic = useCallback(async (): Promise<boolean> => {
     const audio = audioRef.current;
     if (!audio) return false;
 
     try {
-      if (audio.paused) {
-        fadeInAudio(audio, 0.4, 1200);
-        await audio.play();
-        setIsPlaying(true);
-        return true;
+      // 1. Resume / Unlock Web Audio Context if present (unlocks iOS/Android audio subsystem)
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioCtx();
+        }
+        if (audioCtxRef.current.state === "suspended") {
+          await audioCtxRef.current.resume();
+        }
       }
+
+      // 2. Ensure volume is audible (0.75 for Android / desktop)
+      try {
+        audio.volume = 0.75;
+      } catch {
+        // iOS Safari uses hardware buttons only
+      }
+
+      // 3. Load if needed
+      if (audio.readyState === 0) {
+        audio.load();
+      }
+
+      await audio.play();
+      setIsPlaying(true);
       return true;
-    } catch {
+    } catch (err) {
+      console.warn("Mobile audio waiting for user interaction:", err);
       setIsPlaying(false);
       return false;
     }
-  }, [fadeInAudio]);
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
       audio.loop = true;
-      audio.preload = "none";
+      audio.preload = "metadata";
     }
 
     window.__playWeddingMusic = startMusic;
 
-    // 1. Attempt immediate autoplay as soon as component mounts
+    // 1. Attempt immediate playback
     startMusic();
 
-    // 2. Also attempt autoplay on window load
+    // 2. Also attempt on window load
     const onWindowLoad = () => {
       startMusic();
     };
@@ -69,27 +72,29 @@ export const BackgroundMusic = () => {
       window.addEventListener("load", onWindowLoad, { once: true });
     }
 
-    // 3. Guarantee playback on very first user interaction anywhere on the document
-    const handleFirstInteraction = () => {
-      startMusic();
-      removeInteractionListeners();
+    // 3. Listen for first user touch/click to unlock and start audio
+    const handleFirstInteraction = async () => {
+      const ok = await startMusic();
+      if (ok) {
+        removeInteractionListeners();
+      }
     };
 
     const removeInteractionListeners = () => {
       const opts = { capture: true };
-      window.removeEventListener("pointerdown", handleFirstInteraction, opts);
       window.removeEventListener("touchstart", handleFirstInteraction, opts);
       window.removeEventListener("touchend", handleFirstInteraction, opts);
+      window.removeEventListener("pointerdown", handleFirstInteraction, opts);
       window.removeEventListener("mousedown", handleFirstInteraction, opts);
       window.removeEventListener("click", handleFirstInteraction, opts);
       window.removeEventListener("keydown", handleFirstInteraction, opts);
       window.removeEventListener("scroll", handleFirstInteraction, opts);
     };
 
-    const opts = { capture: true, once: true };
-    window.addEventListener("pointerdown", handleFirstInteraction, opts);
+    const opts = { capture: true };
     window.addEventListener("touchstart", handleFirstInteraction, opts);
     window.addEventListener("touchend", handleFirstInteraction, opts);
+    window.addEventListener("pointerdown", handleFirstInteraction, opts);
     window.addEventListener("mousedown", handleFirstInteraction, opts);
     window.addEventListener("click", handleFirstInteraction, opts);
     window.addEventListener("keydown", handleFirstInteraction, opts);
@@ -98,24 +103,25 @@ export const BackgroundMusic = () => {
     return () => {
       removeInteractionListeners();
       window.removeEventListener("load", onWindowLoad);
-      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
       if (audio) {
         audio.pause();
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+        audioCtxRef.current.close().catch(() => {});
       }
     };
   }, [startMusic]);
 
-  const toggleMusic = (e: React.MouseEvent) => {
+  const toggleMusic = async (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
-      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
       audio.pause();
       setIsPlaying(false);
     } else {
-      startMusic();
+      await startMusic();
     }
   };
 
@@ -125,7 +131,7 @@ export const BackgroundMusic = () => {
         ref={audioRef}
         src="/assets/music.mp3"
         loop
-        preload="none"
+        preload="metadata"
         playsInline
       />
       <button

@@ -281,9 +281,16 @@ const Index = () => {
 
   const [loadingState, setLoadingState] = useState<'loading' | 'fading' | 'done'>('loading');
 
-  const handleOpenInvitation = () => {
+  const handleOpenInvitation = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (loadingState === 'done') return;
-    window.__playWeddingMusic?.();
+    try {
+      window.__playWeddingMusic?.();
+    } catch {
+      // fallback
+    }
     setLoadingState('fading');
     setTimeout(() => setLoadingState('done'), 1200);
   };
@@ -317,6 +324,7 @@ const Index = () => {
               type="button"
               className="open-invitation-btn"
               onClick={handleOpenInvitation}
+              onTouchEnd={handleOpenInvitation}
             >
               <Music size={14} />
               <span>Open Invitation</span>
